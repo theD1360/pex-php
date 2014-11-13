@@ -1,0 +1,24 @@
+{
+    "name": "favor/pex",
+    "description": "",
+    "authors": [
+        {
+            "name": "Kevin Cole",
+            "email": "kev.cole@yahoo.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*",
+        "guzzle/guzzle": "3.8.1"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Favor\\Pex\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
