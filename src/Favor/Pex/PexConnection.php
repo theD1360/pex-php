@@ -8,16 +8,35 @@ class PexConnection {
 
     public static function allAccounts()
     {
-        $client = new Client();
-
-        $request = $client->post(Config::get('pex::urls.accountlist'));
+        $url = Config::get('pex::urls.accountlist');
 
         $postData = [
             'password' => Config::get('pex::password'),
             'username' => Config::get('pex::username')
         ];
 
-        $request->setBody(json_encode($postData), 'application/json');
+        return self::fetchPost($url, $postData);
+    }
+
+    public static function findAccount($id) {
+        $url = Config::get('pex::urls.accountdetails');
+
+        $postData = [
+            'password'  => Config::get('pex::password'),
+            'username'  => Config::get('pex::username'),
+            'id'        => $id
+        ];
+
+        return self::fetchPost($url, $postData);
+    }
+
+    public static function fetchPost($url, $data)
+    {
+        $client = new Client();
+
+        $request = $client->post($url);
+
+        $request->setBody(json_encode($data), 'application/json');
 
         $response = $request->send();
 

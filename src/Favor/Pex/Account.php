@@ -14,6 +14,21 @@ class Account
     public function __construct($account = null)
     {
         if ($account) {
+            $this->fill($account);
+        }
+    }
+
+    public function find($pexAccountId)
+    {
+       $account = PexConnection::findAccount($pexAccountId);
+       if ($account) {
+            $this->fill($account);
+       }
+    }
+
+    protected function fill($account)
+    {
+        if ($account) {
             $this->id               = $account['id'];
             $this->firstName        = $account['firstName'];
             $this->lastName         = $account['lastName'];
