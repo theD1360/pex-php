@@ -20,10 +20,12 @@ class Account
 
     public function find($pexAccountId)
     {
-       $account = PexConnection::findAccount($pexAccountId);
-       if ($account) {
+        $connection = new PexConnection;
+
+        $account = $connection->findAccount($pexAccountId);
+        if ($account) {
             $this->fill($account);
-       }
+        }
     }
 
     protected function fill($account)
