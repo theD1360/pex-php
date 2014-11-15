@@ -5,10 +5,10 @@ use \Illuminate\Support;
 class AccountCollection extends \Illuminate\Support\Collection
 {
 
-    public function __construct()
+    public function __construct($creds)
     {
-        $connection = new PexConnection;
-        $accountlist = $connection->allAccounts();
+        $this->connection = new PexConnection($creds);
+        $accountlist = $this->connection->allAccounts();
 
         $items = array();
         foreach($accountlist as $act) {

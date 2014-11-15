@@ -11,8 +11,10 @@ class Account
     public $status;
     public $cards = [];
 
-    public function __construct($account = null)
+    public function __construct($creds, $account = null)
     {
+        $this->connection = new PexConnection($creds);
+
         if ($account) {
             $this->fill($account);
         }
@@ -20,9 +22,7 @@ class Account
 
     public function find($pexAccountId)
     {
-        $connection = new PexConnection;
-
-        $account = $connection->findAccount($pexAccountId);
+        $account = $this->connection->findAccount($pexAccountId);
         if ($account) {
             $this->fill($account);
         }

@@ -10,12 +10,12 @@ use \Guzzle\Http\Subscriber\History;
 
 class PexConnection {
 
-    public function __construct()
+    public function __construct($creds)
     {
-        $this->setConfiguration();
+        $this->setConfiguration($creds);
     }
 
-    public function setConfiguration()
+    public function setConfiguration($creds)
     {
         $basePath = str_finish(dirname(__FILE__), '/../../');
         $defaultConfigPath = $basePath . 'config';
@@ -23,17 +23,8 @@ class PexConnection {
         $defaultLoader = new FileLoader(new Filesystem, $defaultConfigPath);
         $this->config = new Repository($defaultLoader, 'production');
 
-        $root = $_SERVER['DOCUMENT_ROOT'];
-        $overrideConfigPath = $root.'/../app/config/packages/favor/pex';
-
-        $overrideLoader = new FileLoader(new Filesystem, $overrideConfigPath);
-        $overrideConfig = new Repository($overrideLoader, 'production');
-
-        $pexconnection = $overrideConfig->get('pexconnection');
-
-        foreach($pexconnection as $key => $item) {
-            $this->config->set('pexconnection.'.$key, $item);
-        }
+        $this->config->set('pexconnection.username', $creds['username']);
+        $this->config->set('pexconnection.password', $creds['password']);
     }
 
     public function allAccounts()
