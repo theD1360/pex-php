@@ -20,12 +20,31 @@ class Account
         }
     }
 
-    public function find($pexAccountId)
+    public static function find($pexAccountId, $creds)
     {
         $account = $this->connection->findAccount($pexAccountId);
         if ($account) {
-            $this->fill($account);
+            return new self($creds, $pexAccount);
         }
+    }
+
+    public function addCredit($amount)
+    {
+        if (is_numeric($amount) and $amount > 0) {
+            $this->connection->fund($amount);
+        }
+    }
+
+    public function subtractCredit($amount)
+    {
+        if (is_numeric($amount) and $amount > 0) {
+            $this->connection->fund(-$amount);
+        }
+    }
+
+    public function zeroOutCredit()
+    {
+        $this->connection->fund($this->availableBalance);
     }
 
     protected function fill($account)

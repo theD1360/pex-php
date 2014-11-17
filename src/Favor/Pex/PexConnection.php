@@ -65,4 +65,16 @@ class PexConnection {
         return $response->json();
     }
 
+    public function fund($amount)
+    {
+        $url = $this->config->get('pexconnection.urls.accountfund');
+
+        $postData = [
+            'password'  => $this->config->get('pexconnection.password'),
+            'username'  => $this->config->get('pexconnection.username'),
+            'id'        => $id,
+            'amount'    => $amount;
+        ];
+    }
+
 }
