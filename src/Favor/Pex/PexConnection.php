@@ -25,34 +25,56 @@ class PexConnection {
 
         $this->config->set('pexconnection.username', $creds['username']);
         $this->config->set('pexconnection.password', $creds['password']);
+
+        $this->creds = [
+            'password' => $this->config->get('pexconnection.password'),
+            'username' => $this->config->get('pexconnection.username')
+        ];
     }
 
     public function allAccounts()
     {
         $url = $this->config->get('pexconnection.urls.accountlist');
 
-        $postData = [
-            'password' => $this->config->get('pexconnection.password'),
-            'username' => $this->config->get('pexconnection.username')
-        ];
-
-        return self::fetchPost($url, $postData);
+        return self::post($url, $this->creds);
     }
 
     public function findAccount($id)
     {
         $url = $this->config->get('pexconnection.urls.accountdetails');
 
-        $postData = [
-            'password'  => $this->config->get('pexconnection.password'),
-            'username'  => $this->config->get('pexconnection.username'),
-            'id'        => $id
-        ];
+        $postData = array_merge($this->creds, array('id' => $id));
 
-        return self::fetchPost($url, $postData);
+        return self::post($url, $postData);
     }
 
-    public function fetchPost($url, $data)
+    public function fund($id, $amount)
+    {
+        if (!is_numeric($amount)) {
+            throw new PexException('Bad Amount');
+        }
+
+        $url = $this->config->get('pexconnection.urls.accountfund');
+
+        $postData = array_merge($this->creds, array('id' => $id, 'amount' => $amount));
+
+        return self::post($url, $postData);
+    }
+
+    public function updateCardStatus($id, $status)
+    {
+        if (!in_array($status, Card::$updateableCardStatuses)) {
+            throw new PexException('Bad Card Status');
+        }
+
+        $url = $this->config->get('pexconnection.urls.cardupdatestatus');
+
+        $postData = array_merge($this->creds, array('id' => $id, 'status' => $status));
+
+        return self::post($url, $postData);
+    }
+
+    public static function post($url, $data)
     {
         $client = new Client();
 
@@ -64,17 +86,4 @@ class PexConnection {
 
         return $response->json();
     }
-
-    public function fund($amount)
-    {
-        $url = $this->config->get('pexconnection.urls.accountfund');
-
-        $postData = [
-            'password'  => $this->config->get('pexconnection.password'),
-            'username'  => $this->config->get('pexconnection.username'),
-            'id'        => $id,
-            'amount'    => $amount;
-        ];
-    }
-
 }

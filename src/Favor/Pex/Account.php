@@ -11,41 +11,101 @@ class Account
     public $status;
     public $cards = [];
 
-    public function __construct($creds, $account = null)
+    private $connection;
+
+    //*************************************************
+    //********** Static Functions *********************
+    //*************************************************
+
+    public static function find($pexAccountId, $creds)
     {
-        $this->connection = new PexConnection($creds);
+        $connection = new PexConnection($creds);
+        $account = $connection->findAccount($pexAccountId);
+        if ($account) {
+            return new self($connection, $account);
+        }
+    }
+
+    //*************************************************
+    //********** Public Member Functions *********************
+    //*************************************************
+
+    public function __construct($creds_or_conn, $account = null)
+    {
+        if (is_array($creds_or_conn)) {
+            $this->connection = new PexConnection($creds_or_conn);
+        } elseif (is_object($creds_or_conn) and $creds_or_conn instanceof PexConnection) {
+            $this->connection = $creds_or_conn;
+        } else {
+            throw new \Exception('Cannot create Account Object without credentials of connection');
+        }
 
         if ($account) {
             $this->fill($account);
         }
     }
 
-    public static function find($pexAccountId, $creds)
-    {
-        $account = $this->connection->findAccount($pexAccountId);
-        if ($account) {
-            return new self($creds, $pexAccount);
-        }
-    }
-
-    public function addCredit($amount)
+    public function addFunds($amount)
     {
         if (is_numeric($amount) and $amount > 0) {
-            $this->connection->fund($amount);
+            $act = $this->connection->fund($this->id, $amount);
+            $this->fill($act);
         }
+
+        return $this;
     }
 
-    public function subtractCredit($amount)
+    public function removeFunds($amount)
     {
         if (is_numeric($amount) and $amount > 0) {
-            $this->connection->fund(-$amount);
+            $act = $this->connection->fund($this->id, -$amount);
+            $this->fill($act);
         }
+
+        return $this;
     }
 
-    public function zeroOutCredit()
+    public function defundAccount()
     {
-        $this->connection->fund($this->availableBalance);
+        //refersh account just before defunding
+        $refreshedAccount = $this->connection->findAccount($this->id);
+
+        $availableBalance = $refreshedAccount['availableBalance'];
+        if ($availableBalance <= 0) {
+            $this->fill($refreshedAccount);
+        } else {
+            $removeBalance = -$refreshedAccount['availableBalance'];
+            $act = $this->connection->fund($this->id, $removeBalance);
+            $this->fill($act);
+        }
+
+        return $this;
     }
+
+    public function updateCardStatuses($newStatus)
+    {
+        $upperedStatus = strtoupper($newStatus);
+        if (in_array($upperedStatus, Card::$updateableCardStatuses)) {
+
+            $act = false;
+
+            foreach($this->cards as $card) {
+                if ($card->status != $upperedStatus and in_array($card->status, Card::$updateableCardStatuses)) {
+                    $act = $this->connection->updateCardStatus($card->id, $upperedStatus);
+                }
+            }
+
+            if ($act) {
+                $this->fill($act);
+            }
+        }
+
+        return $this;
+    }
+
+    //*************************************************
+    //********** Protected Member Functions *********************
+    //*************************************************
 
     protected function fill($account)
     {
@@ -56,8 +116,14 @@ class Account
             $this->ledgerBalance    = $account['ledgerBalance'];
             $this->availableBalance = $account['availableBalance'];
             $this->status           = $account['status'];
-            $this->cards            = $account['cards'];
+
+            $this->cards = [];
+            foreach($account['cards'] as $c) {
+                $this->cards[] = new Card($c);
+            }
         }
+
+        return $this;
     }
 
 }
