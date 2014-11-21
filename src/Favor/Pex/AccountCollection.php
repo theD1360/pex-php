@@ -12,7 +12,7 @@ class AccountCollection extends \Illuminate\Support\Collection
 
         $items = array();
         foreach($accountlist as $act) {
-            $items[] = new Account($act);
+            $items[] = new Account($this->connection, $act);
         }
 
         parent::__construct($items);
