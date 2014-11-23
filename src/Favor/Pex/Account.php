@@ -119,7 +119,7 @@ class Account
 
             $this->cards = [];
             foreach($account['cards'] as $c) {
-                $this->cards[] = new Card($c);
+                $this->cards[] = new Card($this->connection, $c);
             }
         }
 
