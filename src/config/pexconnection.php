@@ -6,6 +6,10 @@ return [
 
     'password' => '',
 
+    'api_token' => ''
+
+
+
     'urls' => [
 
         'accountlist'           => 'https://coreapi.pexcard.com/v3/admin/cardlist',

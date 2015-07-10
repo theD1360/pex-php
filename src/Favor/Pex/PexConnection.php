@@ -23,12 +23,10 @@ class PexConnection {
         $defaultLoader = new FileLoader(new Filesystem, $defaultConfigPath);
         $this->config = new Repository($defaultLoader, 'production');
 
-        $this->config->set('pexconnection.username', $creds['username']);
-        $this->config->set('pexconnection.password', $creds['password']);
+        $this->config->set('pexconnection.api_token', $creds['api_token']);
 
         $this->creds = [
-            'password' => $this->config->get('pexconnection.password'),
-            'username' => $this->config->get('pexconnection.username')
+            'api_token' => $this->config->get('pexconnection.api_token')
         ];
     }
 
@@ -74,9 +72,15 @@ class PexConnection {
         return self::post($url, $postData);
     }
 
-    public static function post($url, $data)
+    private function getClient()
     {
         $client = new Client();
+        $client->setDefaultOption('headers', array('Authorization' => 'token '.$this->creds['api_token']));
+    }
+
+    private function post($url, $data)
+    {
+        $client = $this->getClient();
 
         $request = $client->post($url);
 
